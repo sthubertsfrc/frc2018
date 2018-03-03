@@ -6,37 +6,39 @@ import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.command.PIDSubsystem;
 import edu.wpi.first.wpilibj.interfaces.Potentiometer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.DigitalInput;
 
 public class ArmAngleController extends PIDSubsystem{
 	Spark positionMotor;
 	Potentiometer pot;
 	AnalogInput ai;
+	DigitalInput lowerLimit;
+	DigitalInput upperLimit;
 	double posSpeed;
 
-	public ArmAngleController (int potPort, int talonPort){
+	public ArmAngleController (int potPort, int talonPort, int lowerLimitPort, int upperLimitPort){
 		super("Position", 0.01, 0.0, 0.001);// The constructor passes a name for the subsystem and the P, I and D constants that are used when computing the motor output
 		setAbsoluteTolerance(0.02);
 		getPIDController().setContinuous(false);
-		setInputRange(0, 255);
-		setOutputRange(-12, 12);
+		setInputRange(-255, 255);
+		setOutputRange(-2.0, 2.0);
 
 		ai = new AnalogInput(potPort);
-		pot = new AnalogPotentiometer(ai, 255, 0);
+		pot = new AnalogPotentiometer(ai, 1.0, 0);
 		positionMotor = new Spark (talonPort);
-
+		lowerLimit = new DigitalInput(lowerLimitPort);
+		upperLimit = new DigitalInput(upperLimitPort);
 	}
-
-	//Methods	
-	public void initDefaultCommand() {
-
+	
+	public void motorUp(){
+		positionMotor.set(-0.1);
 	}
-	public void motorTest(){
-		positionMotor.set(-0.9);
+	
+	public void motorDown(){
+		positionMotor.set(0.1);
 	}
-	public void motorTestDown(){
-		positionMotor.set(0.9);
-	}
-	public void motorTestStop(){
+	
+	public void motorStop(){
 		positionMotor.set(0);
 	}
 
@@ -60,30 +62,29 @@ public class ArmAngleController extends PIDSubsystem{
 		SmartDashboard.putNumber("Pot Angle (scaled)", pot.get());
 	}
 	
-	public void positionZero(){
-		setSetpoint(127.5);
+	public boolean inLimits(){
+		// NOTE: switches are normally closed (i.e. "on") when arm is within limits
+		// This way, if anything fails (wire breaks, 
+		// boolean inLowerLimit = lowerLimit.get();
+		boolean inUpperLimit = upperLimit.get();
+		// SmartDashboard.putBoolean("Arm at Lower Limit", inLowerLimit);
+		SmartDashboard.putBoolean("Arm at Upper Limit", inUpperLimit);
+		return inUpperLimit;
 	}
 	
-	public void positionOne(){
-		setSetpoint(153.0);
+	public void updateMotorSpeed(double speed)
+	{
+		double net_speed = 0.0;
+		if (inLimits()) {
+			net_speed = Math.max(Math.min(speed, 1.0), -1.0);
+		}
+		positionMotor.set(net_speed);
+	}
 
+	@Override
+	protected void initDefaultCommand() {
+		// TODO Auto-generated method stub
+		
 	}
 	
-	public void positionTwo(){
-		setSetpoint(178.5);
-
-	}
-	
-	public void positionThree(){
-		setSetpoint(204.0);
-
-	}
-	
-	public void freeMoveUp(){
-		positionMotor.set(-1);
-
-	}
-	public void freeMoveDown(){
-		positionMotor.set(1);
-	}
 }

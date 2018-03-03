@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 
 
 /**
@@ -47,6 +48,7 @@ public class Robot extends IterativeRobot {
 	Joystick leftJoystick = new Joystick(0);
 	Joystick rightJoystick = new Joystick(1);
 
+
 	//Other variables
 	boolean isSwitchPushed;
 
@@ -66,7 +68,7 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putData("Auto choices", m_chooser);
 
 		//variable initialization
-		positioner = new ArmAngleController (1, 4);
+		positioner = new ArmAngleController (1, 4, 8, 9);
 		inOut = new IntakeOuttake (7, 6);
 		pneumatics = new Pneumatics (0, 1, 2, 3);
 		shooter = new Shooter (8, 9, 1);
@@ -115,8 +117,14 @@ public class Robot extends IterativeRobot {
 		driveAngle = rightJoystick.getX();
 		driveSpeed = rightJoystick.getY();
 		myDrive.arcadeDrive(-driveSpeed, driveAngle, true);
-
+		//  Handle arm positioning (throttle arm motor based on left joystick Y axis)
+		double armLiftVel = leftJoystick.getY();
+		
+		SmartDashboard.putNumber("Arm Speed", armLiftVel);
+		
 		positioner.printControllerVariable();
+		positioner.updateMotorSpeed(armLiftVel);
+		
 		shooter.limitSwitchTest();
 		isSwitchPushed = shooter.limitSwitchTest();
 
@@ -130,25 +138,18 @@ public class Robot extends IterativeRobot {
 
 		//Free Moving Up
 		if (rightJoystick.getRawButton(3) == true){
-			positioner.enable();
-			positioner.setSetpointRelative(2.0);			
+			positioner.motorUp();			
 		}
 
 		//Free Moving Down
 		if (rightJoystick.getRawButton(2) == true){
-			positioner.enable();
-			positioner.setSetpointRelative(-2.0);
+			positioner.motorDown();
 		}
 		
 		if (rightJoystick.getRawButton(4) == true){
-			positioner.disable();
+			positioner.motorStop();
 		}
 		
-		if (rightJoystick.getRawButton(5) == true){
-			positioner.enable();
-			positioner.setSetpoint(20.0);
-		}
-
 		//Loading the shooter
 		if (leftJoystick.getRawButton(1) ==  true){
 			shooter.Load();
@@ -193,10 +194,7 @@ public class Robot extends IterativeRobot {
 		if (leftJoystick.getRawButton(9) == true){
 			pneumatics.pullIn2();
 		}
-
 	}
-
-
 
 	/**
 	 * This function is called periodically during test mode.
