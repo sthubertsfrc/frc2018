@@ -8,6 +8,7 @@
 package org.usfirst.frc.team4637.robot;
 
 import edu.wpi.first.wpilibj.IterativeRobot;
+
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Spark;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
@@ -115,7 +116,7 @@ public class Robot extends IterativeRobot {
 		driveSpeed = rightJoystick.getY();
 		myDrive.arcadeDrive(-driveSpeed, driveAngle, true);
 
-		positioner.potTest();
+		positioner.printControllerVariable();
 		shooter.limitSwitchTest();
 		isSwitchPushed = shooter.limitSwitchTest();
 
@@ -130,14 +131,22 @@ public class Robot extends IterativeRobot {
 		//Free Moving Up
 		if (rightJoystick.getRawButton(3) == true){
 			positioner.enable();
-			positioner.motorTest();			
+			positioner.setSetpointRelative(2.0);			
 		}
-
 
 		//Free Moving Down
 		if (rightJoystick.getRawButton(2) == true){
 			positioner.enable();
-			positioner.motorTestDown();
+			positioner.setSetpointRelative(-2.0);
+		}
+		
+		if (rightJoystick.getRawButton(4) == true){
+			positioner.disable();
+		}
+		
+		if (rightJoystick.getRawButton(5) == true){
+			positioner.enable();
+			positioner.setSetpoint(20.0);
 		}
 
 		//Loading the shooter

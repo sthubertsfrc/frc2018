@@ -41,13 +41,12 @@ public class ArmAngleController extends PIDSubsystem{
 	}
 
 	protected double returnPIDInput() {
-		double works = ai.getAverageVoltage() * 255.0 / 5.0; // returns the sensor value that is providing the feedback for the system
-		SmartDashboard.putNumber("PIDInput", works);
-		return works;
+		double raw_angle = pot.get(); // returns the sensor value that is providing the feedback for the system
+		return raw_angle;
 	}
 
 	protected void usePIDOutput(double output) {
-		SmartDashboard.putNumber("PIDOutput", output);
+		SmartDashboard.putNumber("PID Output", output);
 		positionMotor.pidWrite(output); // this is where the computed output value fromthe PIDController is applied to the motor
 	}
 
@@ -55,10 +54,10 @@ public class ArmAngleController extends PIDSubsystem{
 		returnPIDInput();
 	}
 
-	public void potTest(){
-		double degrees = pot.get();
-		SmartDashboard.putNumber("Pot Degrees", degrees);
-
+	public void printControllerVariable(){
+		SmartDashboard.putNumber("Pot Degrees", pot.get());
+		SmartDashboard.putNumber("PID Input (scaled)", returnPIDInput());
+		SmartDashboard.putNumber("Pot Angle (scaled)", pot.get());
 	}
 	
 	public void positionZero(){
