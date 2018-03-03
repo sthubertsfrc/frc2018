@@ -14,7 +14,10 @@ public class ArmAngleController extends PIDSubsystem{
 	AnalogInput ai;
 	DigitalInput lowerLimit;
 	DigitalInput upperLimit;
-	double speedCtrlGain;
+	
+	// Gains for speed control
+	double upSpeedGain;
+	double downSpeedGain;
 	double armUpDirection;
 
 	public ArmAngleController (int potPort, int talonPort, int lowerLimitPort, int upperLimitPort){
@@ -24,9 +27,10 @@ public class ArmAngleController extends PIDSubsystem{
 		setInputRange(-255, 255);
 		setOutputRange(-1.0, 1.0);
 		
-		// NOTE This gain MUST be between -1.0 and 1.0
-		// 
-		speedCtrlGain = 0.5;
+		// NOTE These gains MUST be between 0.0 and 1.0
+		upSpeedGain = 0.8;
+		downSpeedGain = 0.5;
+		
 		armUpDirection = -1.0;
 		
 		ai = new AnalogInput(potPort);
@@ -102,8 +106,11 @@ public class ArmAngleController extends PIDSubsystem{
 			default:
 		}
 		
+		// Multiply by a different gain depending on if speed is positive or not
+		net_speed *= ((net_speed >= 0.0) ? upSpeedGain : downSpeedGain);
+		
 		// Bound input speed based on controller limits and gain
-		net_speed = applyBound(net_speed * speedCtrlGain * armUpDirection, -1.0, 1.0);
+		net_speed = applyBound(net_speed * armUpDirection, -1.0, 1.0);
 		SmartDashboard.putNumber("Net Arm Speed", net_speed);
 
 		positionMotor.set(net_speed);
