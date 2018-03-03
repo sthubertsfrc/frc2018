@@ -116,11 +116,13 @@ public class Robot extends IterativeRobot {
 		shooter.limitSwitchTest();
 		isSwitchPushed = shooter.limitSwitchTest();
 
-		//Outtake Command
-		if (leftJoystick.getRawButton(2) ==  true){
+		if (leftJoystick.getRawButton(2) == true){
 			inOut.Outtake();
 		}
-		else{
+		else if (leftJoystick.getRawButton(3) == true){
+			inOut.Intake();
+		}
+		else {
 			inOut.Stop();
 		}
 		
@@ -138,14 +140,6 @@ public class Robot extends IterativeRobot {
 		//SHOOT!
 		if(rightJoystick.getRawButton(1) == true){
 			pneumatics.pullIn2();
-		}
-
-		//Intake Command
-		if (leftJoystick.getRawButton(3) == true){
-			inOut.Intake();
-		}
-		else{
-			inOut.Stop();
 		}
 
 		//Push grabber Piston Out
