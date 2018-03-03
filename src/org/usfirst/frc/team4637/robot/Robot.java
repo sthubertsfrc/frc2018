@@ -117,16 +117,20 @@ public class Robot extends IterativeRobot {
 		isSwitchPushed = shooter.limitSwitchTest();
 
 		if (leftJoystick.getRawButton(2) == true){
-			inOut.Outtake();
+			inOut.intake();
 		}
 		else if (leftJoystick.getRawButton(3) == true){
-			inOut.Intake();
+			inOut.outtake();
+		}
+		else if (leftJoystick.getRawButton(5) == true){
+			inOut.spin();
 		}
 		else {
+			// NOTE: only stop if neither button is pressed (otherwise outtake won't work)
 			inOut.Stop();
 		}
 		
-		//Loading the shooter
+		// Loading the shooter
 		if (leftJoystick.getRawButton(1) ==  true){
 			shooter.Load();
 			pneumatics.pushOut2();
