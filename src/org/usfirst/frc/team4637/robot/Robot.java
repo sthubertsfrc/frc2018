@@ -16,8 +16,6 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-import edu.wpi.first.wpilibj.DigitalInput;
-
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -40,8 +38,6 @@ public class Robot extends IterativeRobot {
 	Spark frontRight = new Spark(3);
 	SpeedControllerGroup leftDrive = new SpeedControllerGroup(frontLeft, backLeft);
 	SpeedControllerGroup rightDrive = new SpeedControllerGroup (frontRight, backRight);
-	double driveSpeed;
-	double driveAngle;
 	DifferentialDrive myDrive = new DifferentialDrive (leftDrive, rightDrive);
 
 	//Control declaration
@@ -114,16 +110,8 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void teleopPeriodic() {
-		driveAngle = rightJoystick.getX();
-		driveSpeed = rightJoystick.getY();
-		myDrive.arcadeDrive(-driveSpeed, driveAngle, true);
-		//  Handle arm positioning (throttle arm motor based on left joystick Y axis)
-		double armLiftVel = leftJoystick.getY();
-		
-		SmartDashboard.putNumber("Arm Speed", armLiftVel);
-		
-		positioner.printControllerVariable();
-		positioner.updateMotorSpeed(armLiftVel);
+		updateDriveMotors();
+		handleArmControl();
 		
 		shooter.limitSwitchTest();
 		isSwitchPushed = shooter.limitSwitchTest();
@@ -134,20 +122,6 @@ public class Robot extends IterativeRobot {
 		}
 		else{
 			inOut.Stop();
-		}
-
-		//Free Moving Up
-		if (rightJoystick.getRawButton(3) == true){
-			positioner.motorUp();			
-		}
-
-		//Free Moving Down
-		if (rightJoystick.getRawButton(2) == true){
-			positioner.motorDown();
-		}
-		
-		if (rightJoystick.getRawButton(4) == true){
-			positioner.motorStop();
 		}
 		
 		//Loading the shooter
@@ -174,7 +148,6 @@ public class Robot extends IterativeRobot {
 			inOut.Stop();
 		}
 
-
 		//Push grabber Piston Out
 		if (rightJoystick.getRawButton(8) == true){
 			pneumatics.pushOut1();
@@ -194,6 +167,31 @@ public class Robot extends IterativeRobot {
 		if (leftJoystick.getRawButton(9) == true){
 			pneumatics.pullIn2();
 		}
+	}
+
+	private void updateDriveMotors() {
+		double driveAngle = rightJoystick.getX();
+		double driveSpeed = rightJoystick.getY();
+		
+		SmartDashboard.putNumber("Drive Angle", driveAngle);
+		SmartDashboard.putNumber("Drive Speed", driveSpeed);
+		
+		myDrive.arcadeDrive(-driveSpeed, driveAngle, true);
+	}
+
+	private void handleArmControl() {
+		// Handle arm positioning (throttle arm motor based on left joystick Y axis)
+		double armLiftVel = leftJoystick.getY();
+		
+		positioner.printControllerVariable();
+
+		// Check if fast-positioning button is depressed, and override joystick input with maximum speed
+		if (leftJoystick.getRawButton(4) == true){
+			armLiftVel = 1.0;
+		}
+		
+		SmartDashboard.putNumber("Arm Speed", armLiftVel);
+		positioner.updateMotorSpeed(armLiftVel);
 	}
 
 	/**
