@@ -28,7 +28,7 @@ public class Robot extends IterativeRobot {
 	//Class declaration
 	Shooter shooter;
 	Pneumatics pneumatics;
-	Position positioner;
+	ArmAngleController positioner;
 	IntakeOuttake inOut;
 	
 	//Drive Train declaration
@@ -65,7 +65,7 @@ public class Robot extends IterativeRobot {
 		SmartDashboard.putData("Auto choices", m_chooser);
 		
 		//variable initialization
-		positioner = new Position (1, 4);
+		positioner = new ArmAngleController (1, 4);
 		inOut = new IntakeOuttake (7, 6);
 		pneumatics = new Pneumatics (0, 1, 2, 3);
 		shooter = new Shooter (8, 9, 1);

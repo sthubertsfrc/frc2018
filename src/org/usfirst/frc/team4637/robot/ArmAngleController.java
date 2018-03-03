@@ -7,7 +7,7 @@ import edu.wpi.first.wpilibj.command.PIDSubsystem;
 import edu.wpi.first.wpilibj.interfaces.Potentiometer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-public class Position extends PIDSubsystem{
+public class ArmAngleController extends PIDSubsystem{
 	Spark positionMotor;
 	Potentiometer pot;
 	AnalogInput ai;
@@ -16,7 +16,7 @@ public class Position extends PIDSubsystem{
 
 	//Constructor
 
-	public Position (int potPort, int talonPort){
+	public ArmAngleController (int potPort, int talonPort){
 		super("Position", 0.01, 0.0, 0.001);// The constructor passes a name for the subsystem and the P, I and D constants that are used when computing the motor output
 		setAbsoluteTolerance(0.02);
 		getPIDController().setContinuous(false);
