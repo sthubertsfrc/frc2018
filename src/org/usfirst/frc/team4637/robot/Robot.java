@@ -30,7 +30,7 @@ public class Robot extends IterativeRobot {
 	Pneumatics pneumatics;
 	ArmAngleController positioner;
 	IntakeOuttake inOut;
-	
+
 	//Drive Train declaration
 	Spark backLeft = new Spark(0);
 	Spark frontLeft = new Spark(1);
@@ -41,14 +41,14 @@ public class Robot extends IterativeRobot {
 	double driveSpeed;
 	double driveAngle;
 	DifferentialDrive myDrive = new DifferentialDrive (leftDrive, rightDrive);
-	
+
 	//Control declaration
 	Joystick leftJoystick = new Joystick(0);
 	Joystick rightJoystick = new Joystick(1);
-	
+
 	//Other variables
 	boolean isSwitchPushed;
-	
+
 	private static final String kDefaultAuto = "Default";
 	private static final String kCustomAuto = "My Auto";
 	private String m_autoSelected;
@@ -63,7 +63,7 @@ public class Robot extends IterativeRobot {
 		m_chooser.addDefault("Default Auto", kDefaultAuto);
 		m_chooser.addObject("My Auto", kCustomAuto);
 		SmartDashboard.putData("Auto choices", m_chooser);
-		
+
 		//variable initialization
 		positioner = new ArmAngleController (1, 4);
 		inOut = new IntakeOuttake (7, 6);
@@ -96,13 +96,13 @@ public class Robot extends IterativeRobot {
 	@Override
 	public void autonomousPeriodic() {
 		switch (m_autoSelected) {
-			case kCustomAuto:
-				// Put custom auto code here
-				break;
-			case kDefaultAuto:
-			default:
-				// Put default auto code here
-				break;
+		case kCustomAuto:
+			// Put custom auto code here
+			break;
+		case kDefaultAuto:
+		default:
+			// Put default auto code here
+			break;
 		}
 	}
 
@@ -114,90 +114,80 @@ public class Robot extends IterativeRobot {
 		driveAngle = rightJoystick.getX();
 		driveSpeed = rightJoystick.getY();
 		myDrive.arcadeDrive(-driveSpeed, driveAngle, true);
-		
-			positioner.potTest();
-			shooter.limitSwitchTest();
-			isSwitchPushed = shooter.limitSwitchTest();
-			
-			
-			//Outtake Command
-			if (leftJoystick.getRawButton(2) ==  true){
-				inOut.Outtake();
 
-			}
-			else{
-				inOut.Stop();
-			}
-			
-			//Free Moving Up
-			if (rightJoystick.getRawButton(3) == true){
-				positioner.enable();
-				positioner.motorTest();
-				
-				
-			}
-			else{
-			}
-			
-			//Free Moving Down
-			if (rightJoystick.getRawButton(2) == true){
-				positioner.enable();
-				positioner.motorTestDown();
-				
-				
-				
-			}
-			else{
+		positioner.potTest();
+		shooter.limitSwitchTest();
+		isSwitchPushed = shooter.limitSwitchTest();
 
-			}
-			//Loading the shooter
-			if (leftJoystick.getRawButton(1) ==  true){
-				shooter.Load();
-				pneumatics.pushOut2();
-			}
-			
-			//Limit Switch Fun
-			if (isSwitchPushed == false){
-				shooter.StopLoader();
-			}
-			
-			//SHOOT!
-			if(rightJoystick.getRawButton(1) == true){
-				pneumatics.pullIn2();
-			}
-			
-			//Intake Command
-			if (leftJoystick.getRawButton(3) == true){
-				inOut.Intake();
-			}
-			else{
-				inOut.Stop();
-			}
-			
-			
-			//Push grabber Piston Out
-			if (rightJoystick.getRawButton(8) == true){
-				pneumatics.pushOut1();
-			}
-			
-			//Pull grabber piston in
-			if (rightJoystick.getRawButton(9) == true){
-				pneumatics.pullIn1();
-			}
-			
-			//Push shooter piston out
-			if (leftJoystick.getRawButton(8) == true){
-				pneumatics.pushOut2();
-			}
-			
-			//Pull Shooter piston in
-			if (leftJoystick.getRawButton(9) == true){
-				pneumatics.pullIn2();
-			}
-			
+		//Outtake Command
+		if (leftJoystick.getRawButton(2) ==  true){
+			inOut.Outtake();
 		}
-		
-	
+		else{
+			inOut.Stop();
+		}
+
+		//Free Moving Up
+		if (rightJoystick.getRawButton(3) == true){
+			positioner.enable();
+			positioner.motorTest();			
+		}
+
+
+		//Free Moving Down
+		if (rightJoystick.getRawButton(2) == true){
+			positioner.enable();
+			positioner.motorTestDown();
+		}
+
+		//Loading the shooter
+		if (leftJoystick.getRawButton(1) ==  true){
+			shooter.Load();
+			pneumatics.pushOut2();
+		}
+
+		//Limit Switch Fun
+		if (isSwitchPushed == false){
+			shooter.StopLoader();
+		}
+
+		//SHOOT!
+		if(rightJoystick.getRawButton(1) == true){
+			pneumatics.pullIn2();
+		}
+
+		//Intake Command
+		if (leftJoystick.getRawButton(3) == true){
+			inOut.Intake();
+		}
+		else{
+			inOut.Stop();
+		}
+
+
+		//Push grabber Piston Out
+		if (rightJoystick.getRawButton(8) == true){
+			pneumatics.pushOut1();
+		}
+
+		//Pull grabber piston in
+		if (rightJoystick.getRawButton(9) == true){
+			pneumatics.pullIn1();
+		}
+
+		//Push shooter piston out
+		if (leftJoystick.getRawButton(8) == true){
+			pneumatics.pushOut2();
+		}
+
+		//Pull Shooter piston in
+		if (leftJoystick.getRawButton(9) == true){
+			pneumatics.pullIn2();
+		}
+
+	}
+
+
 
 	/**
 	 * This function is called periodically during test mode.

@@ -13,9 +13,6 @@ public class ArmAngleController extends PIDSubsystem{
 	AnalogInput ai;
 	double posSpeed;
 
-
-	//Constructor
-
 	public ArmAngleController (int potPort, int talonPort){
 		super("Position", 0.01, 0.0, 0.001);// The constructor passes a name for the subsystem and the P, I and D constants that are used when computing the motor output
 		setAbsoluteTolerance(0.02);
@@ -69,7 +66,7 @@ public class ArmAngleController extends PIDSubsystem{
 	}
 	
 	public void positionOne(){
-		setSetpoint(153);
+		setSetpoint(153.0);
 
 	}
 	
@@ -79,7 +76,7 @@ public class ArmAngleController extends PIDSubsystem{
 	}
 	
 	public void positionThree(){
-		setSetpoint(204);
+		setSetpoint(204.0);
 
 	}
 	
@@ -89,7 +86,5 @@ public class ArmAngleController extends PIDSubsystem{
 	}
 	public void freeMoveDown(){
 		positionMotor.set(1);
-
-
 	}
 }
