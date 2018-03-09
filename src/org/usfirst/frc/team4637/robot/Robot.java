@@ -7,6 +7,8 @@
 
 package org.usfirst.frc.team4637.robot;
 
+import java.util.concurrent.locks.ReentrantLock;
+
 import edu.wpi.first.wpilibj.IterativeRobot;
 
 import edu.wpi.first.wpilibj.Joystick;
@@ -66,8 +68,8 @@ public class Robot extends IterativeRobot {
 		//variable initialization
 		positioner = new ArmAngleController (1, 4, 8, 9);
 		inOut = new IntakeOuttake (7, 6);
-		pneumatics = new Pneumatics (0, 1, 2, 3);
-		shooter = new Shooter (8, 9, 1);
+		pneumatics = new Pneumatics(0, 1);
+		shooter = new Shooter(new ReentrantLock(), 8, 9, 1, 2, 3);
 	}
 
 	/**
@@ -110,12 +112,12 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void teleopPeriodic() {
-		updateDriveMotors();
-		handleArmControl();
+	
+		updateDriveMotors(rightJoystick.getX(), rightJoystick.getY());
 		
-		shooter.limitSwitchTest();
-		isSwitchPushed = shooter.limitSwitchTest();
+		handleArmControl(leftJoystick.getY(), leftJoystick.getRawButton(4));
 
+		// Handle grabber states
 		if (leftJoystick.getRawButton(2) == true){
 			inOut.intake();
 		}
@@ -123,6 +125,7 @@ public class Robot extends IterativeRobot {
 			inOut.outtake();
 		}
 		else if (leftJoystick.getRawButton(5) == true){
+			// "Spin" the box by running one side faster than the other
 			inOut.spin();
 		}
 		else {
@@ -130,46 +133,24 @@ public class Robot extends IterativeRobot {
 			inOut.Stop();
 		}
 		
-		// Loading the shooter
-		if (leftJoystick.getRawButton(1) ==  true){
-			shooter.Load();
-			pneumatics.pushOut2();
-		}
-
-		//Limit Switch Fun
-		if (isSwitchPushed == false){
-			shooter.StopLoader();
-		}
-
-		//SHOOT!
-		if(rightJoystick.getRawButton(1) == true){
-			pneumatics.pullIn2();
-		}
-
-		//Push grabber Piston Out
+		// Push grabber Piston Out
 		if (rightJoystick.getRawButton(8) == true){
 			pneumatics.pushOut1();
 		}
 
-		//Pull grabber piston in
+		// Pull grabber piston in
 		if (rightJoystick.getRawButton(9) == true){
 			pneumatics.pullIn1();
 		}
-
-		//Push shooter piston out
-		if (leftJoystick.getRawButton(8) == true){
-			pneumatics.pushOut2();
-		}
-
-		//Pull Shooter piston in
-		if (leftJoystick.getRawButton(9) == true){
-			pneumatics.pullIn2();
-		}
+		
+		// Handle shooter controls
+		
+		
+		
 	}
 
-	private void updateDriveMotors() {
-		double driveAngle = rightJoystick.getX();
-		double driveSpeed = rightJoystick.getY();
+	private void updateDriveMotors(double driveAngle, double driveSpeed) {
+		
 		
 		SmartDashboard.putNumber("Drive Angle", driveAngle);
 		SmartDashboard.putNumber("Drive Speed", driveSpeed);
@@ -177,20 +158,20 @@ public class Robot extends IterativeRobot {
 		myDrive.arcadeDrive(-driveSpeed, driveAngle, true);
 	}
 
-	private void handleArmControl() {
+	private void handleArmControl(double armLiftVel, boolean auto_lift_active) {
 		// Handle arm positioning (throttle arm motor based on left joystick Y axis)
-		double armLiftVel = leftJoystick.getY();
 		
 		positioner.printControllerVariable();
 
 		// Check if fast-positioning button is depressed, and override joystick input with maximum speed
-		if (leftJoystick.getRawButton(4) == true){
+		if (auto_lift_active == true){
 			armLiftVel = 1.0;
 		}
 		
 		SmartDashboard.putNumber("Arm Speed", armLiftVel);
 		positioner.updateMotorSpeed(armLiftVel);
 	}
+	
 
 	/**
 	 * This function is called periodically during test mode.
