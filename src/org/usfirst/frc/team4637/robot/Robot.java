@@ -29,7 +29,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class Robot extends IterativeRobot {
 	//Class declaration
 	Shooter shooter;
-	Pneumatics pneumatics;
+	GrabberSolenoid grabberSolenoid;
 	ArmAngleController positioner;
 	IntakeOuttake inOut;
 
@@ -68,7 +68,7 @@ public class Robot extends IterativeRobot {
 		//variable initialization
 		positioner = new ArmAngleController (1, 4, 8, 9);
 		inOut = new IntakeOuttake (7, 6);
-		pneumatics = new Pneumatics(0, 1);
+		grabberSolenoid = new GrabberSolenoid(0, 1);
 		shooter = new Shooter(new ReentrantLock(), 8, 9, 1, 2, 3);
 	}
 
@@ -135,22 +135,30 @@ public class Robot extends IterativeRobot {
 		
 		// Push grabber Piston Out
 		if (rightJoystick.getRawButton(8) == true){
-			pneumatics.pushOut1();
+			grabberSolenoid.pushOut1();
 		}
 
 		// Pull grabber piston in
 		if (rightJoystick.getRawButton(9) == true){
-			pneumatics.pullIn1();
+			grabberSolenoid.pullIn1();
 		}
 		
-		// Handle shooter controls
+		// Arm shooter
+		if (leftJoystick.getRawButton(1) == true){
+			LoadShooterRunnable reloader = new LoadShooterRunnable(shooter);
+			Thread load_thread = new Thread(reloader);
+			load_thread.start();
+		}
 		
-		
-		
+		// Shoot! (and reload)
+		if (rightJoystick.getRawButton(1) == true){
+			LaunchShooterRunnable launcher = new LaunchShooterRunnable(shooter, inOut, 2.0);
+			Thread shoot_thread = new Thread(launcher);
+			shoot_thread.start();
+		}	
 	}
 
 	private void updateDriveMotors(double driveAngle, double driveSpeed) {
-		
 		
 		SmartDashboard.putNumber("Drive Angle", driveAngle);
 		SmartDashboard.putNumber("Drive Speed", driveSpeed);

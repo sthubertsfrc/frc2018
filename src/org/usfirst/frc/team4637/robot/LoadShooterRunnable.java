@@ -17,6 +17,7 @@ public class LoadShooterRunnable implements Runnable {
 				return;
 			}
 
+			// ************** Load procedure starts here ***********************
 			shooter.setWinchSpeed(0.3);    // start spinning motors slowly to seat clutch
 			Thread.sleep(200); // Wait just long enough for motors to start spinning before trying to engage the clutch
 
@@ -38,6 +39,8 @@ public class LoadShooterRunnable implements Runnable {
 				Thread.sleep(50); 
 			}
 			shooter.setWinchSpeed(0.0);
+			// ************** Load procedure ends here ***********************
+			
 		} catch (InterruptedException e) {
 			// Can't really recover other than to abort
 			return;

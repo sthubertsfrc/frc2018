@@ -4,14 +4,13 @@ import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 
 
-
-public class Pneumatics {
+public class GrabberSolenoid {
 	
 	// Solenoid to drive the grabber 
 	DoubleSolenoid grabberSolenoid;
 	Compressor compressor;
 
-	public Pneumatics (int grabberForwardPort, int grabberReversePort){
+	public GrabberSolenoid (int grabberForwardPort, int grabberReversePort){
 		grabberSolenoid = new DoubleSolenoid(grabberForwardPort, grabberReversePort);
 		compressor = new Compressor();
 	}
