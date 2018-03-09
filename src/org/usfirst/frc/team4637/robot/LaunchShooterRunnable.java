@@ -2,6 +2,8 @@ package org.usfirst.frc.team4637.robot;
 
 import java.util.concurrent.TimeUnit;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 public class LaunchShooterRunnable implements Runnable {
 
 	private Shooter shooter;
@@ -23,7 +25,7 @@ public class LaunchShooterRunnable implements Runnable {
 			if (!shooter.mutex.tryLock(500, TimeUnit.MILLISECONDS)) {
 				return;
 			}
-
+			SmartDashboard.putString("ShooterStatus", "Starting shot");
 			// ************** Launch procedure starts here ***********************
 			shooter.setWinchSpeed(0.0); // Don't release the clutch while the motor is spinning (reduce friction on the clutch)		
 			shooter.releaseShooterClutch(); // SHOOT!
@@ -32,6 +34,7 @@ public class LaunchShooterRunnable implements Runnable {
 			Thread.sleep(500); // Delay to sync up solenoid and grabber wheels
 			grabber.Stop();
 			Thread.sleep(reloadTime_ms); // Ensure that shot is away and stuff has stopped moving
+			SmartDashboard.putString("ShooterStatus", "Shot done");
 			// ************** Launch procedure ends here *************************
 			
 		} catch (InterruptedException e) {

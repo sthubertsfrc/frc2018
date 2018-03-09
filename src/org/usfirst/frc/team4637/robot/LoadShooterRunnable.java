@@ -2,6 +2,8 @@ package org.usfirst.frc.team4637.robot;
 
 import java.util.concurrent.TimeUnit;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 public class LoadShooterRunnable implements Runnable {
 
 	private Shooter shooter;
@@ -18,6 +20,7 @@ public class LoadShooterRunnable implements Runnable {
 			}
 
 			// ************** Load procedure starts here ***********************
+			SmartDashboard.putString("ShooterStatus", "Starting to load shooter");
 			shooter.setWinchSpeed(0.3);    // start spinning motors slowly to seat clutch
 			Thread.sleep(200); // Wait just long enough for motors to start spinning before trying to engage the clutch
 
@@ -39,6 +42,7 @@ public class LoadShooterRunnable implements Runnable {
 				Thread.sleep(50); 
 			}
 			shooter.setWinchSpeed(0.0);
+			SmartDashboard.putString("ShooterStatus", "Loaded and ready to fire!");
 			// ************** Load procedure ends here ***********************
 			
 		} catch (InterruptedException e) {
