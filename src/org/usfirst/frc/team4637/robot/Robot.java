@@ -12,9 +12,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import edu.wpi.first.wpilibj.IterativeRobot;
 
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.Spark;
-import edu.wpi.first.wpilibj.SpeedControllerGroup;
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -34,13 +31,7 @@ public class Robot extends IterativeRobot {
 	IntakeOuttake inOut;
 
 	//Drive Train declaration
-	Spark backLeft = new Spark(0);
-	Spark frontLeft = new Spark(1);
-	Spark backRight= new Spark(2);
-	Spark frontRight = new Spark(3);
-	SpeedControllerGroup leftDrive = new SpeedControllerGroup(frontLeft, backLeft);
-	SpeedControllerGroup rightDrive = new SpeedControllerGroup (frontRight, backRight);
-	DifferentialDrive myDrive = new DifferentialDrive (leftDrive, rightDrive);
+	DriveControl drive = new DriveControl();
 
 	//Control declaration
 	Joystick leftJoystick = new Joystick(0);
@@ -91,6 +82,15 @@ public class Robot extends IterativeRobot {
 		System.out.println("Auto selected: " + m_autoSelected);
 	}
 
+	public void sleep(double seconds)
+	{
+		try {
+			// Convert from seconds to ms for sleep function
+			Thread.sleep((long)seconds*1000);
+		} catch (InterruptedException e) {
+			// Do nothing if interrupted (it shouln't be anyway)
+		}
+	}
 	/**
 	 * This function is called periodically during autonomous.
 	 */
@@ -98,11 +98,15 @@ public class Robot extends IterativeRobot {
 	public void autonomousPeriodic() {
 		switch (m_autoSelected) {
 		case kCustomAuto:
-			// Put custom auto code here
+			/************** Autonomous code starts here ********************************/
+			drive.moveAtAngleAndSpeed(0, 0.50); // Start moving forward
+			sleep(3.0);
+			drive.stop(); // Stop
+			/************** Autonomous code end here ********************************/
 			break;
 		case kDefaultAuto:
 		default:
-			// Put default auto code here
+			// Autonomous mode disabled, do nothing
 			break;
 		}
 	}
@@ -116,7 +120,7 @@ public class Robot extends IterativeRobot {
 		// Call this here just to update the smart dashboard
 		SmartDashboard.putBoolean("Shooter Limit Switch State", shooter.limitSwitchTest());
 		
-		updateDriveMotors(rightJoystick.getX(), rightJoystick.getY());
+		drive.moveAtAngleAndSpeed(rightJoystick.getX(), rightJoystick.getY());
 		
 		handleArmControl(leftJoystick.getY(), leftJoystick.getRawButton(4));
 
@@ -161,13 +165,6 @@ public class Robot extends IterativeRobot {
 		}	
 	}
 
-	private void updateDriveMotors(double driveAngle, double driveSpeed) {
-		
-		SmartDashboard.putNumber("Drive Angle", driveAngle);
-		SmartDashboard.putNumber("Drive Speed", driveSpeed);
-		
-		myDrive.arcadeDrive(-driveSpeed, driveAngle, true);
-	}
 
 	private void handleArmControl(double armLiftVel, boolean auto_lift_active) {
 		// Handle arm positioning (throttle arm motor based on left joystick Y axis)
