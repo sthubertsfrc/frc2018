@@ -112,7 +112,10 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void teleopPeriodic() {
-	
+		
+		// Call this here just to update the smart dashboard
+		SmartDashboard.putBoolean("Shooter Limit Switch State", shooter.limitSwitchTest());
+		
 		updateDriveMotors(rightJoystick.getX(), rightJoystick.getY());
 		
 		handleArmControl(leftJoystick.getY(), leftJoystick.getRawButton(4));

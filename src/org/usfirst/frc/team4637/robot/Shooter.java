@@ -7,7 +7,6 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PWMTalonSRX;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Shooter {
 
@@ -64,8 +63,7 @@ public class Shooter {
 	}
 
 	public boolean limitSwitchTest(){
-		boolean isSwitchPushed = limitSwitch.get();
-		SmartDashboard.putBoolean("Limit Switch Pushed", isSwitchPushed);
+		boolean isSwitchPushed = !limitSwitch.get(); // 5V connected to NC so it's true by default, false when switch is closed
 		return isSwitchPushed;
 	}
 }
