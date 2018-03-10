@@ -49,8 +49,8 @@ public class LaunchShooterRunnable implements Runnable {
 		}
 		
 		// Re-load the shooter after shooting
-		LoadShooterRunnable reloader = new LoadShooterRunnable(shooter);
-		Thread reload_thread = new Thread(reloader);
-		reload_thread.start();
+		// LoadShooterRunnable reloader = new LoadShooterRunnable(shooter);
+		// Thread reload_thread = new Thread(reloader);
+		// reload_thread.start();
 	}
 }
