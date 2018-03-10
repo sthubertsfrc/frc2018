@@ -34,13 +34,15 @@ public class LoadShooterRunnable implements Runnable {
 			}
 
 			// ************** Load procedure starts here ***********************
-			SmartDashboard.putString("ShooterStatus", "Starting to load shooter");
+			SmartDashboard.putString("ShooterStatus", "(1) Starting");
 			shooter.setWinchSpeed(0.3);    // start spinning motors slowly to seat clutch
-			Thread.sleep(200); // Wait just long enough for motors to start spinning before trying to engage the clutch
+			sleepWithLimitCheck(100); // Wait just long enough for motors to start spinning before trying to engage the clutch
 
 			shooter.armShooterClutch();  // Activate solenoid (while motor is spinning) to seat clutch
+			SmartDashboard.putString("ShooterStatus", "(2) Clutch Engaged");
 			if (!sleepWithLimitCheck(2000));  // Wait long enough for clutch to seat, but also check for limit switch contact in case it seats quickly
 			{
+				SmartDashboard.putString("ShooterStatus", "(3) Winding shooter arm");
 				// NOTE: only ramp up speed and wait if limit switch hasn't already tripped
 				shooter.setWinchSpeed(1.0); // Run at full speed while arming the mechanism
 				sleepWithLimitCheck(10000); // Wait 10 seconds or until limit switch trips
@@ -48,7 +50,7 @@ public class LoadShooterRunnable implements Runnable {
 
 			shooter.setWinchSpeed(0.0); // Stop winch motor once the mechanism is fully sprung
 			
-			SmartDashboard.putString("ShooterStatus", "Loaded and ready to fire!");
+			SmartDashboard.putString("ShooterStatus", "(4) Ready to Fire");
 			// ************** Load procedure ends here ***********************
 			
 		} catch (InterruptedException e) {
