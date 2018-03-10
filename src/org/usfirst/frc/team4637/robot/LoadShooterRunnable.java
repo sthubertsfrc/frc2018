@@ -13,6 +13,20 @@ public class LoadShooterRunnable implements Runnable {
 		shooter = shooter_in;
 	}
 
+	/** Sleep for the designated amount of time, but break out early if the limit switch trips */
+	private boolean sleepWithLimitCheck(long sleep_ms) throws InterruptedException
+	{
+		final long refresh_time_ms = 50;
+		while (sleep_ms > 0) {
+			if (shooter.limitSwitchTest()) {
+				return true;
+			}
+			Thread.sleep(Math.max(Math.min(sleep_ms, refresh_time_ms), 0));
+			sleep_ms -= refresh_time_ms;
+		}
+		return false;
+	}
+	
 	public void run() {
 		try {
 			if (!shooter.mutex.tryLock(500, TimeUnit.MILLISECONDS)) {
@@ -25,23 +39,15 @@ public class LoadShooterRunnable implements Runnable {
 			Thread.sleep(200); // Wait just long enough for motors to start spinning before trying to engage the clutch
 
 			shooter.armShooterClutch();  // Activate solenoid (while motor is spinning) to seat clutch
-			Thread.sleep(2000);  // Wait long enough for clutch to seat
-
-			// Arm shooter w/ winch at full speed
-			long t_initial = System.currentTimeMillis();
-			final long winch_timeout = 10000; // milliseconds before winch shuts off regardless of limit switch
-			long t_cutoff =  t_initial + winch_timeout; // Stop winch after this time
-
-			shooter.setWinchSpeed(1.0);
-
-			while (System.currentTimeMillis() < t_cutoff) {
-				// WARNING: we don't even start looking for the limit switch until here, so make sure that previous lines don't take too long!
-				if (shooter.limitSwitchTest()) {
-					break;
-				}
-				Thread.sleep(50); 
+			if (!sleepWithLimitCheck(2000));  // Wait long enough for clutch to seat, but also check for limit switch contact in case it seats quickly
+			{
+				// NOTE: only ramp up speed and wait if limit switch hasn't already tripped
+				shooter.setWinchSpeed(1.0); // Run at full speed while arming the mechanism
+				sleepWithLimitCheck(10000); // Wait 10 seconds or until limit switch trips
 			}
-			shooter.setWinchSpeed(0.0);
+
+			shooter.setWinchSpeed(0.0); // Stop winch motor once the mechanism is fully sprung
+			
 			SmartDashboard.putString("ShooterStatus", "Loaded and ready to fire!");
 			// ************** Load procedure ends here ***********************
 			
