@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Victor;
+import edu.wpi.first.wpilibj.command.Command;
 // import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -32,6 +33,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
  * project.
  */
 public class Robot extends IterativeRobot {
+	SendableChooser autonomousChooser;
+	
 	//Class declaration
 	Shooter shooter;
 	GrabberSolenoid grabberSolenoid;
@@ -95,6 +98,7 @@ public class Robot extends IterativeRobot {
 		solenoid2B.set(push);
 
         // gyro.calibrate();
+		autonomousChooser = new SendableChooser();
         
 	}
 
@@ -111,6 +115,9 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void autonomousInit() {
+		// autonomousChooser.addDefault("Option 1", new Command());
+		// autonomousChooser.addOption("Option 2", new Command());
+		// SmartDashboard.putData("Autonomous Mode Chooser", autonomousChooser);
 
 		double someval = SmartDashboard.getNumber("Starting Pos", 0.0);
 		autoStartTime = Timer.getFPGATimestamp();
@@ -293,6 +300,5 @@ public class Robot extends IterativeRobot {
 	public void testPeriodic() {
 //		SmartDashboard.putNumber("Gyro Angle", gyro.getAngle());
 //		SmartDashboard.putNumber("Gyro Rate", gyro.getRate());
-		SmartDashboard.putNumber("Encoder", leftEncoder.getDistance());
 	}
 }
