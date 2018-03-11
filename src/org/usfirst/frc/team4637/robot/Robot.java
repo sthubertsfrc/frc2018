@@ -9,12 +9,16 @@ package org.usfirst.frc.team4637.robot;
 
 import java.util.concurrent.locks.ReentrantLock;
 
+// import edu.wpi.first.wpilibj.ADXRS450_Gyro;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
 
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Victor;
+// import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -34,14 +38,15 @@ public class Robot extends IterativeRobot {
 	ArmAngleController positioner;
 	IntakeOuttake inOut;
 	Victor winch;
+	// Gyro gyro = new ADXRS450_Gyro();
+	
 	//Drive Train declaration
 	DriveControl drive = new DriveControl();
+    Encoder leftEncoder = new Encoder(2, 3, false, Encoder.EncodingType.k4X);
 
 	//Control declaration
 	Joystick leftJoystick = new Joystick(0);
 	Joystick rightJoystick = new Joystick(1);
-
-
 
 	//Other variables
 	boolean isSwitchPushed;
@@ -49,7 +54,6 @@ public class Robot extends IterativeRobot {
 	boolean push;
 	Solenoid solenoid2A;
 	Solenoid solenoid2B;
-
 
 	private static final String kDefaultAuto = "Default";
 	private static final String kCustomAuto = "My Auto";
@@ -60,7 +64,12 @@ public class Robot extends IterativeRobot {
 	boolean releaseHook2;
 	boolean releaseHookIn2;
 	
+	// Autonomous control variables
 	double autoStartTime;
+	double Kp = 0.04;
+	double Kd = Kp / 10.0;
+	
+	String gameData;
 
 	/**
 	 * This function is run when the robot is first started up and should be
@@ -82,10 +91,11 @@ public class Robot extends IterativeRobot {
 		Solenoid solenoid2A = new Solenoid(4);
 		Solenoid solenoid2B = new Solenoid(5);
 
-
-
 		solenoid2A.set(pull);
 		solenoid2B.set(push);
+
+        // gyro.calibrate();
+        
 	}
 
 	/**
@@ -101,8 +111,14 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void autonomousInit() {
+
+		double someval = SmartDashboard.getNumber("Starting Pos", 0.0);
 		autoStartTime = Timer.getFPGATimestamp();
+		gameData = DriverStation.getInstance().getGameSpecificMessage();
 		System.out.printf("Auto started at %f sec\n", autoStartTime);
+		SmartDashboard.putString("Game Data", gameData);
+		SmartDashboard.putNumber("Got setting", someval);
+		// gyro.reset();
 	}
 	
 	public double getCurrentAutonomousTime() {
@@ -118,27 +134,55 @@ public class Robot extends IterativeRobot {
 			// Do nothing if interrupted (it shouln't be anyway)
 		}
 	}
+	
+	public void driveAtFixedAngle(double speed, double angle_ref)
+	{
+//		double err_angle = angle_ref - gyro.getAngle();
+//		double err_rate = 0.0 - gyro.getRate();
+//		double angleCorrection = Kp * err_angle + Kd * err_rate; // get current heading
+//		
+//		drive.moveAtAngleAndSpeed(angleCorrection, speed, false);
+	}
 	/**
 	 * This function is called periodically during autonomous.
 	 */
 	@Override
 	public void autonomousPeriodic() {
+		
 		/************** Autonomous code starts here ********************************/
 		double t = getCurrentAutonomousTime();
-		if(t < 3.0) {
+		if(t < 2.0) {
 			drive.moveAtAngleAndSpeed(0, 0.50, false); // Start moving forward
 		} else {
 			drive.stop();
 		}
+
 		/************** Autonomous code end here ********************************/
 	}
 
+	public double getEncoderDistInch()
+	{
+		return leftEncoder.getDistance() * 18.5 / 2048.0;
+	}
+	
+	public void teleopInit() {
+		// Pull in hook arm by default
+		try {
+			shooter.releaseShooterClutch();
+		} catch (InterruptedException e) {
+		}
+//		gyro.reset();
+		leftEncoder.reset();
+	}
 	/**
 	 * This function is called periodically during operator control.
 	 */
 	@Override
 	public void teleopPeriodic() {
 
+//		SmartDashboard.putNumber("Gyro Angle", gyro.getAngle());
+//		SmartDashboard.putNumber("Gyro Rate", gyro.getRate());
+		SmartDashboard.putNumber("Encoder", leftEncoder.getDistance());
 		// Call this here just to update the smart dashboard
 		SmartDashboard.putBoolean("Shooter Limit Switch State", shooter.limitSwitchTest());
 
@@ -186,19 +230,30 @@ public class Robot extends IterativeRobot {
 		}
 
 		// Arm shooter
+		// Extend the hook
 		if (leftJoystick.getRawButton(1) == true){
-			LoadShooterRunnable reloader = new LoadShooterRunnable(shooter);
-			Thread load_thread = new Thread(reloader);
-			load_thread.start();
+			try {
+				// KLUDGE controls the hook arm
+				shooter.armShooterClutch();
+			} catch (InterruptedException e) {
+			}
+			//LoadShooterRunnable reloader = new LoadShooterRunnable(shooter);
+			//Thread load_thread = new Thread(reloader);
+			//load_thread.start();
 		}
 
 		// Shoot! (and reload)
+		// Retract the hook
 		if (rightJoystick.getRawButton(1) == true){
-			LaunchShooterRunnable launcher = new LaunchShooterRunnable(shooter, inOut, 2.0);
-			Thread shoot_thread = new Thread(launcher);
-			shoot_thread.start();
+			try {
+				shooter.releaseShooterClutch();
+				// KLUDGE controls the hook arm
+			} catch (InterruptedException e) {
+			}
+			//LaunchShooterRunnable launcher = new LaunchShooterRunnable(shooter, inOut, 2.0);
+			//Thread shoot_thread = new Thread(launcher);
+			//shoot_thread.start();
 		}	
-
 	}
 
 
@@ -227,11 +282,17 @@ public class Robot extends IterativeRobot {
 
 	}
 
+	public void testInit() {
+//		gyro.reset();
+	}
 
 	/**
 	 * This function is called periodically during test mode.
 	 */
 	@Override
 	public void testPeriodic() {
+//		SmartDashboard.putNumber("Gyro Angle", gyro.getAngle());
+//		SmartDashboard.putNumber("Gyro Rate", gyro.getRate());
+		SmartDashboard.putNumber("Encoder", leftEncoder.getDistance());
 	}
 }
