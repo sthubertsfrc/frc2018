@@ -22,7 +22,7 @@ public class DriveControl {
 		SmartDashboard.putNumber("Drive Angle", driveAngle);
 		SmartDashboard.putNumber("Drive Speed", driveSpeed);
 		
-		myDrive.arcadeDrive(-driveSpeed, driveAngle, true);
+		myDrive.arcadeDrive(-driveSpeed*.9, driveAngle*.8, true);
 	}
 	
 	public void stop() {
