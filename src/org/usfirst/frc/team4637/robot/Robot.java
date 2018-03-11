@@ -12,8 +12,12 @@ import java.util.concurrent.locks.ReentrantLock;
 import edu.wpi.first.wpilibj.IterativeRobot;
 
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Solenoid;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 
 
 /**
@@ -29,7 +33,7 @@ public class Robot extends IterativeRobot {
 	GrabberSolenoid grabberSolenoid;
 	ArmAngleController positioner;
 	IntakeOuttake inOut;
-
+	Victor winch;
 	//Drive Train declaration
 	DriveControl drive = new DriveControl();
 
@@ -38,13 +42,26 @@ public class Robot extends IterativeRobot {
 	Joystick rightJoystick = new Joystick(1);
 
 
+
 	//Other variables
 	boolean isSwitchPushed;
+	boolean pull;
+	boolean push;
+	Solenoid solenoid2A;
+	Solenoid solenoid2B;
+
 
 	private static final String kDefaultAuto = "Default";
 	private static final String kCustomAuto = "My Auto";
 	private String m_autoSelected;
 	private SendableChooser<String> m_chooser = new SendableChooser<>();
+	boolean releaseHook;
+	boolean releaseHookIn;
+
+	boolean releaseHook2;
+	boolean releaseHookIn2;
+	
+	double autoStartTime;
 
 	/**
 	 * This function is run when the robot is first started up and should be
@@ -61,6 +78,15 @@ public class Robot extends IterativeRobot {
 		inOut = new IntakeOuttake (7, 6);
 		grabberSolenoid = new GrabberSolenoid(0, 1);
 		shooter = new Shooter(new ReentrantLock(), 8, 9, 1, 2, 3);
+		winch = new Victor(5);
+
+		Solenoid solenoid2A = new Solenoid(4);
+		Solenoid solenoid2B = new Solenoid(5);
+
+
+
+		solenoid2A.set(pull);
+		solenoid2B.set(push);
 	}
 
 	/**
@@ -96,33 +122,51 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void autonomousPeriodic() {
-		switch (m_autoSelected) {
-		case kCustomAuto:
-			/************** Autonomous code starts here ********************************/
-			drive.moveAtAngleAndSpeed(0, 0.50); // Start moving forward
-			sleep(3.0);
+		//switch (m_autoSelected) {
+		//case kCustomAuto:
+		/************** Autonomous code starts here ********************************/
+		drive.moveAtAngleAndSpeed(0, -0.50); // Start moving forward
+		int autoTick;
+		autoTick = 0;
+		//sleep(3);
+		if(++autoTick>=120) {
 			drive.stop(); // Stop
-			/************** Autonomous code end here ********************************/
-			break;
-		case kDefaultAuto:
-		default:
-			// Autonomous mode disabled, do nothing
-			break;
+			autoTick = 0;
 		}
+
+
+		/************** Autonomous code end here ********************************/
+		//break;
+		//case kDefaultAuto:
+		//default:
+		// Autonomous mode disabled, do nothing
+		//break;
 	}
+	//}
 
 	/**
 	 * This function is called periodically during operator control.
 	 */
 	@Override
 	public void teleopPeriodic() {
-		
+
 		// Call this here just to update the smart dashboard
 		SmartDashboard.putBoolean("Shooter Limit Switch State", shooter.limitSwitchTest());
-		
+
 		drive.moveAtAngleAndSpeed(rightJoystick.getX(), rightJoystick.getY());
-		
+
 		handleArmControl(leftJoystick.getY(), leftJoystick.getRawButton(4));
+
+		releaseHook2 = leftJoystick.getRawButton(6);
+		releaseHookIn2 = leftJoystick.getRawButton(7);
+
+
+		if (leftJoystick.getRawButton(11) == true){
+			winch.set(1);
+		}
+		else 
+			winch.set(0);
+
 
 		// Handle grabber states
 		if (leftJoystick.getRawButton(2) == true){
@@ -149,37 +193,49 @@ public class Robot extends IterativeRobot {
 		if (rightJoystick.getRawButton(9) == true){
 			grabberSolenoid.pullIn1();
 		}
-		
+
 		// Arm shooter
 		if (leftJoystick.getRawButton(1) == true){
 			LoadShooterRunnable reloader = new LoadShooterRunnable(shooter);
 			Thread load_thread = new Thread(reloader);
 			load_thread.start();
 		}
-		
+
 		// Shoot! (and reload)
 		if (rightJoystick.getRawButton(1) == true){
 			LaunchShooterRunnable launcher = new LaunchShooterRunnable(shooter, inOut, 2.0);
 			Thread shoot_thread = new Thread(launcher);
 			shoot_thread.start();
 		}	
+
 	}
 
 
 	private void handleArmControl(double armLiftVel, boolean auto_lift_active) {
 		// Handle arm positioning (throttle arm motor based on left joystick Y axis)
-		
+
 		positioner.printControllerVariable();
 
 		// Check if fast-positioning button is depressed, and override joystick input with maximum speed
 		if (auto_lift_active == true){
 			armLiftVel = 1.0;
 		}
-		
+
 		SmartDashboard.putNumber("Arm Speed", armLiftVel);
 		positioner.updateMotorSpeed(armLiftVel);
+
+		if (releaseHook) {
+
+			solenoid2A.set(pull); //PCM sol. port 5
+			solenoid2B.set(push);  //PCM sol. port 6
+
+		} else if (releaseHookIn) {
+			solenoid2B.set(pull); //PCM sol. port 5
+			solenoid2A.set(push);  //PCM sol. port 6
+		}
+
 	}
-	
+
 
 	/**
 	 * This function is called periodically during test mode.
