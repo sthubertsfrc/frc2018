@@ -12,8 +12,8 @@ public class IntakeOuttake {
 	public IntakeOuttake(int leftPort, int rightPort) {
 		leftVictor = new PWMVictorSPX (leftPort);
 		rightVictor = new PWMVictorSPX (rightPort);
-		intakeSpeed = 0.8;
-		outtakeSpeed = 0.8;
+		intakeSpeed = 1.0;
+		outtakeSpeed = 1.0;
 	}
 
 	//Methods
