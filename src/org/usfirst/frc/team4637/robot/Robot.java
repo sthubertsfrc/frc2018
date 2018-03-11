@@ -53,7 +53,6 @@ public class Robot extends IterativeRobot {
 
 	private static final String kDefaultAuto = "Default";
 	private static final String kCustomAuto = "My Auto";
-	private String m_autoSelected;
 	private SendableChooser<String> m_chooser = new SendableChooser<>();
 	boolean releaseHook;
 	boolean releaseHookIn;
@@ -102,10 +101,12 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void autonomousInit() {
-		m_autoSelected = m_chooser.getSelected();
-		// autoSelected = SmartDashboard.getString("Auto Selector",
-		// defaultAuto);
-		System.out.println("Auto selected: " + m_autoSelected);
+		autoStartTime = Timer.getFPGATimestamp();
+		System.out.printf("Auto started at %f sec\n", autoStartTime);
+	}
+	
+	public double getCurrentAutonomousTime() {
+		return Timer.getFPGATimestamp() - autoStartTime;
 	}
 
 	public void sleep(double seconds)
@@ -122,27 +123,15 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void autonomousPeriodic() {
-		//switch (m_autoSelected) {
-		//case kCustomAuto:
 		/************** Autonomous code starts here ********************************/
-		drive.moveAtAngleAndSpeed(0, -0.50); // Start moving forward
-		int autoTick;
-		autoTick = 0;
-		//sleep(3);
-		if(++autoTick>=120) {
-			drive.stop(); // Stop
-			autoTick = 0;
+		double t = getCurrentAutonomousTime();
+		if(t < 3.0) {
+			drive.moveAtAngleAndSpeed(0, 0.50, false); // Start moving forward
+		} else {
+			drive.stop();
 		}
-
-
 		/************** Autonomous code end here ********************************/
-		//break;
-		//case kDefaultAuto:
-		//default:
-		// Autonomous mode disabled, do nothing
-		//break;
 	}
-	//}
 
 	/**
 	 * This function is called periodically during operator control.
@@ -153,7 +142,9 @@ public class Robot extends IterativeRobot {
 		// Call this here just to update the smart dashboard
 		SmartDashboard.putBoolean("Shooter Limit Switch State", shooter.limitSwitchTest());
 
-		drive.moveAtAngleAndSpeed(rightJoystick.getX(), rightJoystick.getY());
+		// Flip sign on Y axis so that forward on the stick is actually forward
+		// Reduce the sensitivity slightly of drive input from stick
+		drive.moveAtAngleAndSpeed(rightJoystick.getX()*.8, -rightJoystick.getY()*.9, true);
 
 		handleArmControl(leftJoystick.getY(), leftJoystick.getRawButton(4));
 
@@ -183,7 +174,7 @@ public class Robot extends IterativeRobot {
 			// NOTE: only stop if neither button is pressed (otherwise outtake won't work)
 			inOut.Stop();
 		}
-		
+
 		// Push grabber Piston Out
 		if (rightJoystick.getRawButton(8) == true){
 			grabberSolenoid.pushOut1();

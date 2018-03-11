@@ -17,15 +17,15 @@ public class DriveControl {
 	SpeedControllerGroup rightDrive = new SpeedControllerGroup (frontRight, backRight);
 	DifferentialDrive myDrive = new DifferentialDrive (leftDrive, rightDrive);
 
-	public void moveAtAngleAndSpeed(double driveAngle, double driveSpeed) {
+	public void moveAtAngleAndSpeed(double driveAngle, double driveSpeed, boolean squaredDrive) {
 		
 		SmartDashboard.putNumber("Drive Angle", driveAngle);
 		SmartDashboard.putNumber("Drive Speed", driveSpeed);
 		
-		myDrive.arcadeDrive(-driveSpeed*.9, driveAngle*.8, true);
+		myDrive.arcadeDrive(driveSpeed, driveAngle, squaredDrive);
 	}
 	
 	public void stop() {
-		moveAtAngleAndSpeed(0.0, 0.0);
+		moveAtAngleAndSpeed(0.0, 0.0, true);
 	}
 }
