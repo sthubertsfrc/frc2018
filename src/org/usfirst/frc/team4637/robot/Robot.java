@@ -9,7 +9,7 @@ package org.usfirst.frc.team4637.robot;
 
 import java.util.concurrent.locks.ReentrantLock;
 
-// import edu.wpi.first.wpilibj.ADXRS450_Gyro;
+import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.IterativeRobot;
@@ -19,7 +19,7 @@ import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.Victor;
 import edu.wpi.first.wpilibj.command.Command;
-// import edu.wpi.first.wpilibj.interfaces.Gyro;
+import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -41,7 +41,7 @@ public class Robot extends IterativeRobot {
 	ArmAngleController positioner;
 	IntakeOuttake inOut;
 	Victor winch;
-	// Gyro gyro = new ADXRS450_Gyro();
+	Gyro gyro = new ADXRS450_Gyro();
 	
 	//Drive Train declaration
 	DriveControl drive = new DriveControl();
@@ -97,7 +97,7 @@ public class Robot extends IterativeRobot {
 		solenoid2A.set(pull);
 		solenoid2B.set(push);
 
-        // gyro.calibrate();
+         gyro.calibrate();
 		autonomousChooser = new SendableChooser();
         
 	}
@@ -125,7 +125,7 @@ public class Robot extends IterativeRobot {
 		System.out.printf("Auto started at %f sec\n", autoStartTime);
 		SmartDashboard.putString("Game Data", gameData);
 		SmartDashboard.putNumber("Got setting", someval);
-		// gyro.reset();
+		gyro.reset();
 	}
 	
 	public double getCurrentAutonomousTime() {
@@ -290,7 +290,7 @@ public class Robot extends IterativeRobot {
 	}
 
 	public void testInit() {
-//		gyro.reset();
+		gyro.reset();
 	}
 
 	/**
@@ -298,7 +298,7 @@ public class Robot extends IterativeRobot {
 	 */
 	@Override
 	public void testPeriodic() {
-//		SmartDashboard.putNumber("Gyro Angle", gyro.getAngle());
-//		SmartDashboard.putNumber("Gyro Rate", gyro.getRate());
+		SmartDashboard.putNumber("Gyro Angle", gyro.getAngle());
+		SmartDashboard.putNumber("Gyro Rate", gyro.getRate());
 	}
 }
